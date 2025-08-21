@@ -27,7 +27,7 @@ def create_name() -> str:
 @click.argument('path', default='/var/lib/postgresql/16/dumps/')
 def create_dump(database_name: str, path: str) -> None:
     name = create_name()
-    full_path = f'{path}{name}'
+    full_path = f'{path}{name}' if path[-1] == '/' else f'{path}/{name}'
     exit_code = os.system(f"pg_dump -F tar -f '{full_path}' -U postgres {database_name}")
 
     if exit_code != 0:
