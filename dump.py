@@ -6,7 +6,7 @@ import time
 import subprocess
 import exceptions as ex
 
-from vault_s3 import send_dump
+from vault_s3 import send_dump, download_dump_s3
 
 @click.group()
 def cli():
@@ -33,6 +33,7 @@ def make_dump(full_path: str, database_name: str, name: str) -> None:
     ex.exception_pg_dump(exit_code)
     ex.exception_gzip_file(gzip_file(full_path))
     full_path = full_path + '.gz' 
+    name = name + '.gz'
     send_dump(full_path, database_name, name)
 
 @cli.command()
@@ -64,9 +65,12 @@ def create_dump_all(path: str) -> None:
 
 @cli.command()
 @click.argument('database_name')
-@click.argument('path', default='/var/lib/postgresql/16/saved/')
+@click.argument('path', default='/var/lib/postgresql/16/saves/')
 def download_dump(database_name: str, path: str) -> None:
     '''Dump restore'''
 
+    path = path if path[-1] == '/' else f"{path}/"
+    download_dump_s3(path, database_name)
+    
 if __name__ == '__main__':
     cli()
